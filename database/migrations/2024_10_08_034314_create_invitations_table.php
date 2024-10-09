@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('members', function (Blueprint $table) {
+        Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->string('email');
             $table->unsignedBigInteger('groupe_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('groupe_id')->references('id')->on('groupes')->onDelete('cascade');
-            $table->string('role')->nullable(); // Ex: admin, member, etc.
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('members');
+        Schema::dropIfExists('invitations');
     }
 };

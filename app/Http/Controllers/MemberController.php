@@ -38,9 +38,7 @@ class MemberController extends Controller
         $data = [
             'user_id' =>$request->user_id,
             'groupe_id' => $request->groupe_id,
-            // 'name'=>$request->name,
-            // 'email'=>$request->email,
-            // 'role' => '',
+            'email'=>$request->email,
         ];
 
         // $member = $this->memberInterface->createMember($data);

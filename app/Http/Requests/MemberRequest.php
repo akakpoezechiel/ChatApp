@@ -25,7 +25,7 @@ class MemberRequest extends FormRequest
             'user_id' => 'required|integer',
             'groupe_id' => 'required|integer',
             // 'name' => 'required|string',
-            // 'email' => 'required|email',
+            'email' => 'required|email',
             
         ];
     }

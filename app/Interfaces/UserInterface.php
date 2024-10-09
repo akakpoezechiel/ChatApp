@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-interface UserInterface
+interface UserInterface 
 {
     public function create(array $data);
 

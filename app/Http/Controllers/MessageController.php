@@ -30,20 +30,20 @@ class MessageController extends Controller
     }
 
     // Créer un nouveau message
-    public function store(Request $request)
-    {
-        // Validation des données
-    //    $data = [
-    //         'User_id' => 'required|integer|exists:users,id',
-    //         'receiver_id' => 'nullable|integer|exists:users,id',
-    //         'file_'
-    //         'group_id' => 'required|string|max:500'
-    //     ];
+    // public function store(Request $request)
+    // {
+    //     // Validation des données
+    // //    $data = [
+    // //         'User_id' => 'required|integer|exists:users,id',
+    // //         'receiver_id' => 'nullable|integer|exists:users,id',
+    // //         'file_'
+    // //         'group_id' => 'required|string|max:500'
+    // //     ];
 
-        // Création du message via le repository
-        $message = $this->messageInterface->createMessage($data);
-        return response()->json($message, 201);
-    }
+    //     // Création du message via le repository
+    //     $message = $this->messageInterface->createMessage($data);
+    //     return response()->json($message, 201);
+    // }
 
     // Mettre à jour un message
     public function update(Request $request, $id)

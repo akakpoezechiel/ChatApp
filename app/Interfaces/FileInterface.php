@@ -3,7 +3,7 @@ namespace App\Interfaces;
 
 interface FileInterface
 {
-    public function getAllFiles();
+    public function getAllFiles($groupId);
 
     public function store(array $data);
 

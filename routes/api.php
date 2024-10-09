@@ -15,11 +15,25 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('v1.0.0')->group(function() 
 {
-   Route::post('/register' ,[AuthController::class,'register']);
+   Route::post('/register' ,[AuthController::class,'create']);
    Route::post('login',[AuthController::class,'login']);
    Route::post('createGroup',[GroupeController::class,'createGroup']);
    Route::get('allGroupe', [GroupeController::class, 'getAllGroups']);
+   Route::post('groupe/{groupId}/addUser', [GroupeController::class, 'addUserToGroup']);
+//    Route::post('groupe/{groupId}/addUser', [GroupeController::class, 'sendfile']);
+   
    Route::post('file',[FileController::class,'store']);
+
+   Route::get('download/{filename}', [FileController::class, 'download'])->name('file.download');
+
+   Route::get('/groupes/{id}/members', [GroupeController::class, 'showMembers']);
+
+
+
+   Route::get('getAllFiles/{groupId}',[FileController::class,'index']);
+
+   route::get('/all_users', [AuthController::class, 'List_user']);
+
 
 
 //    Route::get('members', [MemberController::class, 'index']);

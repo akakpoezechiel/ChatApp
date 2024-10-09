@@ -15,9 +15,9 @@ class FileRepository implements FileInterface
         // return File::createFile($data);
         return File::create($data);
     }
-    public function getAllFiles()
+    public function getAllFiles($groupId)
     {
-        return File::all();
+        return File::where('group_id', $groupId)->get();
     }
 
     public function getFileById($id)

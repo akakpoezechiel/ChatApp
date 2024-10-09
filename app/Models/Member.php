@@ -10,7 +10,7 @@ class Member extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'groupe_id', 'role', 
+        'user_id', 'groupe_id', 'email','role', 
         // Autres champs si nécessaire
     ];
 

@@ -47,4 +47,9 @@ class Groupe extends Model
     {
         return $this->hasMany(File::class);
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'groupe_user', 'groupe_id', 'user_id');
+    }
 }

@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id(); // Crée la colonne 'id' comme clé primaire
             $table->string('filename')->nullable(); // Colonne 'filename', peut être nulle
-            $table->string('filepath'); // Colonne 'filepath', obligatoire
-            $table->unsignedBigInteger('user_id'); // Colonne 'user_id', peut être nulle
+            $table->unsignedBigInteger('user_id')->nullable(); // Colonne 'user_id', peut être nulle
             $table->unsignedBigInteger('group_id')->nullable(); // Colonne 'group_id', ajoutée comme clé étrangère, peut être nulle
             $table->timestamps(); // Colonnes 'created_at' et 'updated_at'
         

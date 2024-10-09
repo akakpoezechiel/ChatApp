@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FileRequest;
 use App\Interfaces\FileInterface;
+use App\mail\fileNotification;
 use App\Models\File;
 // use App\Repositories\Interfaces\FileInterface;
+use App\Models\Groupe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Responses\ApiResponse;
+use Illuminate\Support\Facades\Mail;
 
 class FileController extends Controller
 {
@@ -20,11 +24,43 @@ class FileController extends Controller
     }
 
     // Récupère tous les fichiers
-    public function index()
+    public function index($groupId)
     {
-        $files = $this->fileInterface->getAllFiles();
-        return response()->json($files);
+       try{
+
+        $files = $this->fileInterface->getAllFiles($groupId);
+
+        
+        return ApiResponse::sendResponse(
+            true,
+            ['files' => $files],
+            'fichiers récupérés avec succès.'
+        );
+
+
+       }catch (\Exception $th){
+        return response()->json([
+           'success' => false,
+           'message' => 'Erreur lors de la récupération des données.',
+            'error' => $th->getMessage()
+        ], 500);
+       }
+   
+      
     }
+   
+
+
+    public function download($filename)
+{
+    $file = storage_path("/Upload/{$filename}");
+    
+    if (file_exists($file)) {
+        return response()->download($file);
+    }
+    
+    return abort(404, 'Fichier non trouvé.');
+}
 
     // Récupère un fichier par son ID
     public function show($id)
@@ -34,32 +70,57 @@ class FileController extends Controller
     }
 
     // Crée un nouveau fichier
-    public function store(FileRequest $request)
+    public function store(Request $request)
     {
 
-        $filePath = null;
+        $request->validate([
+            'group_id' => 'required|integer',
+            'user_id' => 'required|integer',
+            'file' => 'required|file|max: 10240' 
+            
+        ]);
 
-        if ($request->hasFile('filepath')) {
+        $file = new File();
+        $file->group_id = $request->group_id;
+        $file->user_id = $request->user_id;
 
-            $file = $request->file('filepath');
-
-            $fileName = 'chatapp_' . time() . rand(10000, 99999) . '.' . $file->getClientOriginalExtension(); // Nom unique pour le fichier
-            $filePath = $file->storeAs('files', $fileName, 'public'); // Stockage de le fichier dans 'public/files'
+        if ($request->hasFile('file')){
+            $fichier = $request->file('file');
+            $filename = $fichier->getClientOriginalName();
+            $fichier->move(public_path('Upload'), $filename);
+            $file->filename = $filename;	
         }
 
-        $data = [
-            'filename' => $request->filename,
-            'filepath' => $filePath,
-            'user_id' => $request->user_id,
-            'group_id' => $request->group_id,
-        ];
+        $file->save();
+        
 
-        DB::beginTransaction();
 
-        $file = $this->fileInterface->store($data);
-        DB::commit();
-        return response()->json($file, 201);
+    $groupe = Groupe::with('users')->find($request->group_id);
+
+    if (!$groupe) {
+        return response()->json(['message' => 'Groupe non trouvé.'], 404);
     }
+
+    $emails = $groupe->users->pluck('email');
+
+    foreach ($emails as $email) {
+        Mail::to($email)->send(new FileNotification( $groupe->name)); // Corrigé : $Crew->name à $groupe->name
+    }
+
+    return response()->json(['message' => 'Notifications envoyées avec succès.'], 201);
+
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fichier créé avec succès.',
+         'file' => $file
+     ], 201);
+
+
+
+        
+    }
+    
 
     // Met à jour un fichier
     // public function update(Request $request, $id)

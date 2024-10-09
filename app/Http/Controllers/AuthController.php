@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\Userresource;
 use App\Interfaces\UserInterface;
 use App\Mail\OtpCodeMail;
+use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
 use App\Responses\ApiResponse;
 use Illuminate\Http\Request;
@@ -25,47 +26,63 @@ class AuthController extends Controller
         $this->userInterface = $userInterface;
     }
 
-    public function register(RegisterRequest $request)
+    public function create(RegisterRequest $request)
     {
         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'password_confirm' => ($request->password_confirm),
-            // 'role_id' => $request->role_id
+            // 'password_confirmation' => $request->password_confirmation,
         ];
-
-        //    try {
-
-
-        //     return response()->json($user, 201);
-        //    } catch (\Throwable $th) {
-
-        //     return $th;
-        //     //throw $th;
-        //    }
-
 
         DB::beginTransaction();
         try {
+            
             $user = $this->userInterface->create($data);
-            Mail::to($request->email)->send(new OtpCodeMail($request->name,$request->email,$request->password));
+
+
             DB::commit();
+
+            if(!$user){
+                return ApiResponse::sendResponse(
+                     false,
+                    [$user],
+                    'Opération échouée',
+                    400
+
+                
+                );
+            }
 
             return ApiResponse::sendResponse(
                 true,
-                [new Userresource($user)],
-                'Opération effectuée.'
+                [new UserResource($user)],
+                'Opération effectuée avec succès.'
             );
         } catch (\Throwable $th) {
-            return $th;
             DB::rollback();
+            return $th;
             return ApiResponse::rollback($th);
         }
     }
 
 
-   public function login(LoginRequest $loginRequest)
+
+    public function List_user(){
+        $users = User::all();
+    return response()->json($users->map(function ($user) {
+        // S'assurer que l'avatar existe
+        if ($user->avatar) {
+            $user->avatar = asset('uploads/' . $user->avatar);
+        }
+        return $user;
+    }));
+    }
+
+
+
+
+    public function login(LoginRequest $loginRequest)
     {
         $data = [
             'email' => $loginRequest->email,
@@ -73,23 +90,21 @@ class AuthController extends Controller
         ];
 
         DB::beginTransaction();
-        try{
+        try {
             $user = $this->userInterface->login($data);
 
             DB::commit();
 
             return ApiResponse::sendResponse(
-                $user, 
-                [], 
-                'Connexion effectuée.', 
-            200
+                $user,
+                [],
+                'Connexion effectuée.',
+                200
             );
-
-        }catch (\throwable $th){
+        } catch (\throwable $th) {
             return $th;
 
-            return ApiResponse::rollback($th);
-
+            return ApiResponse::rollback(e: $th);
         }
     }
 
@@ -97,14 +112,13 @@ class AuthController extends Controller
     public function update(UpdateProfileRequest $request)
     {
         $data = $request->validated();
-        
     }
 
     public function checkOtpCode(Request $request)
     {
         $data = [
             'email' => $request->email,
-            'code' => $request->password,
+            'code' => $request->code,
             
         ];
 
@@ -120,7 +134,7 @@ class AuthController extends Controller
                     false,
                     [new UserResource($user)],
                     'Code de confirmation invalide.',
-                    300
+                    200
                 );
             }
 
@@ -137,11 +151,11 @@ class AuthController extends Controller
 
     }
 
+
     public function user(Request $request)
     {
         $name = $request->name; // Récupère le nom directement depuis la requête
         // Vous pouvez maintenant utiliser la variable $name
     }
 
-   
 }
